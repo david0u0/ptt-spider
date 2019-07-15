@@ -2,15 +2,16 @@ const path = require('path');
 // const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
+	target: 'electron-renderer',
 	entry: {
-		index: './src/app.tsx'
+		index: './frontend/app.tsx'
 	},
 	resolve: {
 		mainFields: ['browser', 'main', 'module'],
 		extensions: ['.ts', '.tsx', '.js'],
 	},
 	output: {
-		path: path.resolve(__dirname, 'dist/src'),
+		path: path.resolve(__dirname, 'dist/frontend'),
 		filename: 'bundle.js',
 	},
 	module: {

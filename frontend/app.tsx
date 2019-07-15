@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { isNull } from 'util';
-import { startQuery } from './spider';
+import { startCrawl } from './spider';
 
 function useInput(
 	placeholder: string,
 	style: { [name: string]: string }={},
-	check: (s: string) => boolean = () => true
+	check: (s: string) => boolean = () => true,
+	init_value: string='',
 ): [JSX.Element, string] {
-	let [value, setValue] = React.useState('');
+	let [value, setValue] = React.useState(init_value);
 	return [<input
 		type='text'
 		value={value}
@@ -33,6 +34,13 @@ function App(): JSX.Element {
 		}
 		return false;
 	}
+	function checkNotEmpty(s: string): boolean {
+		if (s.indexOf(' ') != -1) {
+			return false;
+		} else {
+			return s.length > 0;
+		}
+	}
 
 	let input_style = {
 		display: 'block',
@@ -40,9 +48,9 @@ function App(): JSX.Element {
 		marginLeft: 'auto',
 		marginRight: 'auto',
 	};
-	let [i_board_name, board_name] = useInput('看板名稱', input_style);
-	let [i_keyword, keyword] = useInput('關鍵字', input_style);
-	let [i_date, date] = useInput('日期 (YYYY/MM/DD)', input_style, checkDate);
+	let [i_board_name, board_name] = useInput('看板名稱', input_style, checkNotEmpty, 'WomenTalk');
+	let [i_keyword, keyword] = useInput('關鍵字', input_style, checkNotEmpty, '[活動]');
+	let [i_date, date] = useInput('日期 (YYYY/MM/DD)', input_style, checkDate, '2019/7/13');
 
 	return <div style={{
 		height: '100%',
@@ -61,7 +69,7 @@ function App(): JSX.Element {
 			{i_keyword}
 			{i_date}
 			<button onClick={() => {
-				startQuery(board_name, new Date(date), keyword);
+				startCrawl(board_name, new Date(date), keyword);
 			}} disabled={!checkDate(date)}>開始查詢</button>
 		</div>
 	</div>;
