@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { isNull } from 'util';
 import { startCrawl } from './spider';
+import { Article } from './article';
 
 function useInput(
 	placeholder: string,
@@ -23,25 +24,24 @@ function useInput(
 		}}
 	/>, value];
 }
+function checkDate(s: string): boolean {
+	if (/\d+\/\d+\/\d+/.test(s)) {
+		let d = new Date(s);
+		if (!isNaN(d.getTime()) && d.getTime() > 1000) {
+			return true;
+		}
+	}
+	return false;
+}
+function checkNotEmpty(s: string): boolean {
+	if (s.indexOf(' ') != -1) {
+		return false;
+	} else {
+		return s.length > 0;
+	}
+}
 
 function App(): JSX.Element {
-	function checkDate(s: string): boolean {
-		if (/\d+\/\d+\/\d+/.test(s)) {
-			let d = new Date(s);
-			if (!isNaN(d.getTime()) && d.getTime() > 1000) {
-				return true;
-			}
-		}
-		return false;
-	}
-	function checkNotEmpty(s: string): boolean {
-		if (s.indexOf(' ') != -1) {
-			return false;
-		} else {
-			return s.length > 0;
-		}
-	}
-
 	let input_style = {
 		display: 'block',
 		width: '90%',
@@ -51,6 +51,8 @@ function App(): JSX.Element {
 	let [i_board_name, board_name] = useInput('看板名稱', input_style, checkNotEmpty, 'WomenTalk');
 	let [i_keyword, keyword] = useInput('關鍵字', input_style, checkNotEmpty, '[活動]');
 	let [i_date, date] = useInput('日期 (YYYY/MM/DD)', input_style, checkDate, '2019/7/13');
+	let [articles, setArticle] = React.useState<Article[]>([]);
+	let [fetching, setFetching] = React.useState(true);
 
 	return <div style={{
 		height: '100%',
@@ -68,9 +70,25 @@ function App(): JSX.Element {
 			{i_board_name}
 			{i_keyword}
 			{i_date}
-			<button onClick={() => {
-				startCrawl(board_name, new Date(date), keyword);
+			<button onClick={async () => {
+				let res = await startCrawl(board_name, new Date(date), keyword);
+				setArticle(res);
+				setFetching(false);
 			}} disabled={!checkDate(date)}>開始查詢</button>
+		</div>
+		<div style={{
+			gridColumnStart: 2,
+			gridColumnEnd: 3
+		}}>
+			{
+				(() => {
+					if (fetching) {
+						return <div/>;
+					} else {
+						return <div>{JSON.stringify(articles)}</div>;
+					}
+				})()
+			}
 		</div>
 	</div>;
 }

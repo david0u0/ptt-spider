@@ -7,17 +7,23 @@ const BASE = 'https://www.ptt.cc/';
 
 async function crawlArticle(url: string, date: Date): Promise<Article | null> {
 	let rs = await Axios.get(url);
-	let body = cheerio.load(rs.data);
+	let body = cheerio.load(rs.data, { decodeEntities: false });
 
 	let lines = body('.article-metaline');
 	let author = body(lines[0]).find('.article-meta-value').html();
 	let title = body(lines[1]).find('.article-meta-value').html();
 	let cur_date = new Date(body(lines[2]).find('.article-meta-value').html());
-	console.log(rs.data);
 	if (cur_date < date) {
 		return null;
 	} else {
-		return new Article(title, author, cur_date);
+		let article = new Article(title, author, cur_date);
+		body('.push').each((_, push) => {
+			let str_type = body(push).find('.push-tag').html();
+			let author = body(push).find('.push-userid').html();
+			article.addComment(author, str_type);
+		});
+
+		return article;
 	}
 }
 
@@ -56,7 +62,7 @@ async function crawlSingleList(
 	}
 }
 
-export async function startCrawl(b_name: string, date: Date, keyword: string): Promise<void> {
+export async function startCrawl(b_name: string, date: Date, keyword: string): Promise<Article[]> {
 	let url = `${BASE}/bbs/${b_name}/search?q=${keyword}`;
 	let rs = await Axios.get(url);
 	let body = cheerio.load(rs.data);
@@ -77,5 +83,5 @@ export async function startCrawl(b_name: string, date: Date, keyword: string): P
 		}
 		articles = articles.concat(t);
 	}
-	console.log(articles);
+	return articles;
 }
