@@ -5,18 +5,22 @@
     },
     "extends": "eslint:recommended",
     "globals": {
+        "process": true,
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true
-        },
         "ecmaVersion": 2018,
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        }
     },
     "plugins": [
-        "react"
+        "react",
+        "@typescript-eslint"
     ],
     "rules": {
         "no-unused-vars": [
@@ -31,7 +35,7 @@
         "no-trailing-spaces": [
             "error"
         ],
-        "curely": [
+        "curly": [
             "error"
         ],
         "guard-for-in": [
@@ -55,6 +59,33 @@
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                "varsIgnorePattern": "_.*"
+            }
+        ],
+        "@typescript-eslint/semi": [
+            "error"
+        ],
+        "@typescript-eslint/no-use-before-define": [
+            "error"
+        ],
+        "@typescript-eslint/no-explicit-any": [
+            "error"
+        ],
+        "@typescript-eslint/class-name-casing": [
+            "error"
+        ],
+        "@typescript-eslint/explicit-function-return-type": [
+            "error",
+            {
+                "allowExpressions": true
+            }
+        ],
+        "react/jsx-uses-vars": "warn",
+        "react/jsx-uses-react": "warn",
+        "react/react-in-jsx-scope": "error"
     }
 }
