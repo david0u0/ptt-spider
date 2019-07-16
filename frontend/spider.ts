@@ -66,7 +66,6 @@ async function crawlSingleList(
 			promises.push(crawlArticle(author, title, `${BASE}/${href}`, date));
 		});
 		let articles = await Promise.all(promises);
-		console.log(articles);
 		for (let i = 0; i < articles.length; i++) {
 			if (!articles[i]) {
 				articles.splice(i, 1);
@@ -77,7 +76,12 @@ async function crawlSingleList(
 	}
 }
 
-export async function startCrawl(b_name: string, date: Date, keyword: string): Promise<Article[]> {
+export async function startCrawl(
+	b_name: string,
+	date: Date,
+	keyword: string,
+	appendLog: (s: string) => void
+): Promise<Article[]> {
 	let url = `${BASE}/bbs/${b_name}/search?q=${keyword}`;
 	let rs = await Axios.get(url);
 	let body = cheerio.load(rs.data, { decodeEntities: false });
@@ -86,10 +90,10 @@ export async function startCrawl(b_name: string, date: Date, keyword: string): P
 	let page_max = parseInt(oldest_href.match(/\w*\/search\?\w*page=(\d+)\w*/)[1]);
 
 	let articles = new Array<Article>();
-	console.log('正在處理第1頁...');
+	appendLog('正在處理第1頁...');
 	articles = await crawlSingleList(date, body);
 	for (let i = 2; i <= page_max; i++) {
-		console.log(`正在處理第${i}頁...`);
+		appendLog(`正在處理第${i}頁...`);
 		let t = await crawlSingleList(date, b_name, keyword, i);
 		if (t.length == 0) {
 			break;
@@ -99,5 +103,6 @@ export async function startCrawl(b_name: string, date: Date, keyword: string): P
 	for (let [i, a] of articles.entries()) {
 		a.index = -i;
 	}
+	appendLog(`共計${articles.length}篇文章！`);
 	return articles;
 }

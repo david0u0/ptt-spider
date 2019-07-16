@@ -53,38 +53,65 @@ function App(): JSX.Element {
 	let [articles, setArticle] = React.useState<Article[]>([]);
 	let [fetching, setFetching] = React.useState(false);
 	let [cur_flag, setCurFlag] = React.useState(SortFlag.Index);
+	let [log, setLog] = React.useState('');
 
 	function switchFlag(flag: SortFlag): void {
 		setCurFlag(flag);
 		setArticle(sortArticles(articles, flag));
 	}
 
+	function appendLog(s: string): void {
+		setLog(prev_log => prev_log + '\n' + s);
+	}
+
 	return <div style={{
-		height: '100%',
-		width: '100%',
+		height: '100vh',
+		width: '100vw',
 		display: 'grid',
-		gridTemplateColumns: '20fr 80fr',
+		gridTemplateColumns: '20vw 80vw',
 	}}>
 		<div style={{
+			display: 'grid',
 			borderRightColor: 'gray',
 			borderRightStyle: 'solid',
 			borderRightWidth: 1,
-			gridColumnStart: 1,
-			gridColumnEnd: 2
+			gridColumn: '1/2',
+			gridTemplateRows: '50vh 50vh',
 		}}>
-			<div style={{ marginLeft: 'auto', marginRight: 'auto', width: '90%' }}>
+			<div style={{
+				paddingLeft: '5%',
+				paddingRight: '5%',
+				marginTop: 5,
+				gridRow: '1/2',
+				borderBottomColor: 'gray',
+				borderBottomStyle: 'solid',
+				borderBottomWidth: 1,
+			}}>
 				{i_board_name}
 				{i_keyword}
 				{i_date}
 				<button onClick={async () => {
 					setFetching(true);
-					let res = await startCrawl(board_name, new Date(date), keyword);
+					let res = await startCrawl(board_name, new Date(date), keyword, appendLog);
 					setArticle(sortArticles(res, cur_flag));
 					setFetching(false);
 				}}
 				disabled={!checkDate(date) || fetching}>
 					開始查詢
 				</button>
+			</div>
+			<div style={{
+				marginTop: 5,
+				paddingLeft: '5%',
+				paddingRight: '5%',
+				gridRow: '2/3',
+				overflowY: 'scroll'
+			}}>
+				{
+					log.split('\n').map(s => {
+						return <div>{s}</div>;
+					})
+				}
 			</div>
 		</div>
 		<FlagContext.Provider value={{ cur_flag, switchFlag }}>

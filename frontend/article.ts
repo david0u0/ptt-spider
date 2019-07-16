@@ -7,7 +7,7 @@ class Comment {
 	) {}
 }
 
-type Dict = { [id: string]: number };
+export type IdDict = { [id: string]: number };
 
 export class Article {
 	public index: number;
@@ -27,12 +27,12 @@ export class Article {
 	public get diff_push(): number { return this._diff_push; }
 	public get diff_fuck(): number { return this._diff_fuck; }
 	public get diff_arrow(): number { return this._diff_arrow; }
-	private _push_id_dict: Dict;
-	private _fuck_id_dict: Dict;
-	private _arrow_id_dict: Dict;
-	public get push_id_dict(): Dict { return { ...this._push_id_dict }; }
-	public get fuck_id_dict(): Dict { return { ...this._fuck_id_dict }; }
-	public get arrow_id_dict(): Dict { return { ...this._arrow_id_dict }; }
+	private _push_id_dict: IdDict;
+	private _fuck_id_dict: IdDict;
+	private _arrow_id_dict: IdDict;
+	public get push_id_dict(): IdDict { return { ...this._push_id_dict }; }
+	public get fuck_id_dict(): IdDict { return { ...this._fuck_id_dict }; }
+	public get arrow_id_dict(): IdDict { return { ...this._arrow_id_dict }; }
 
 	public get total(): number { return this._push + this._fuck + this._arrow; }
 	public get clean_push(): number { return this._push - this._fuck; }
