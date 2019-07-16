@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import Axios, { AxiosStatic, AxiosInstance, AxiosResponse } from 'axios';
 import cheerio from 'cheerio';
 import { Article } from './article';
 
@@ -6,7 +6,12 @@ import { Article } from './article';
 const BASE = 'https://www.ptt.cc/';
 
 async function crawlArticle(url: string, date: Date): Promise<Article | null> {
-	let rs = await Axios.get(url);
+	let rs: AxiosResponse;
+	try {
+		rs = await Axios.get(url);
+	} catch (err) {
+		return null;
+	}
 	let body = cheerio.load(rs.data, { decodeEntities: false });
 
 	let lines = body('.article-metaline');
@@ -16,13 +21,12 @@ async function crawlArticle(url: string, date: Date): Promise<Article | null> {
 	if (cur_date < date) {
 		return null;
 	} else {
-		let article = new Article(title, author, cur_date);
+		let article = new Article(url, title, author, cur_date);
 		body('.push').each((_, push) => {
 			let str_type = body(push).find('.push-tag').html();
 			let author = body(push).find('.push-userid').html();
 			article.addComment(author, str_type);
 		});
-
 		return article;
 	}
 }
@@ -42,7 +46,12 @@ async function crawlSingleList(
 ): Promise<Article[]> {
 	if (typeof arg == 'string') {
 		let url = `${BASE}/bbs/${arg}/search?q=${keyword}&page=${page}`;
-		let rs = await Axios.get(url);
+		let rs: AxiosResponse;
+		try {
+			rs = await Axios.get(url);
+		} catch (err) {
+			return [];
+		}
 		let body = cheerio.load(rs.data);
 		return await crawlSingleList(date, body);
 	} else {
@@ -52,10 +61,11 @@ async function crawlSingleList(
 			promises.push(crawlArticle(`${BASE}/${href}`, date));
 		});
 		let articles = await Promise.all(promises);
-		for (let [i, a] of articles.entries()) {
-			if (!a) {
-				articles = articles.slice(0, i);
-				break;
+		console.log(articles);
+		for (let i = 0; i < articles.length; i++) {
+			if (!articles[i]) {
+				articles.splice(i, 1);
+				i--;
 			}
 		}
 		return articles;
@@ -70,14 +80,12 @@ export async function startCrawl(b_name: string, date: Date, keyword: string): P
 	let oldest_href = body('.btn-group-paging').find('a').attr('href');
 	let page_max = parseInt(oldest_href.match(/\w*\/search\?\w*page=(\d+)\w*/)[1]);
 
-	console.log(oldest_href);
-	console.log(page_max);
 	let articles = new Array<Article>();
-	articles.concat(await crawlSingleList(date, body));
+	console.log('正在處理第1頁...');
+	articles = await crawlSingleList(date, body);
 	for (let i = 2; i <= page_max; i++) {
 		console.log(`正在處理第${i}頁...`);
 		let t = await crawlSingleList(date, b_name, keyword, i);
-		console.log(t);
 		if (t.length == 0) {
 			break;
 		}

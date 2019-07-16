@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { isNull } from 'util';
 import { startCrawl } from './spider';
 import { Article } from './article';
+import { ArticleList } from './article_list';
 
 function useInput(
 	placeholder: string,
@@ -52,7 +52,7 @@ function App(): JSX.Element {
 	let [i_keyword, keyword] = useInput('關鍵字', input_style, checkNotEmpty, '[活動]');
 	let [i_date, date] = useInput('日期 (YYYY/MM/DD)', input_style, checkDate, '2019/7/13');
 	let [articles, setArticle] = React.useState<Article[]>([]);
-	let [fetching, setFetching] = React.useState(true);
+	let [fetching, setFetching] = React.useState(false);
 
 	return <div style={{
 		height: '100%',
@@ -71,24 +71,18 @@ function App(): JSX.Element {
 			{i_keyword}
 			{i_date}
 			<button onClick={async () => {
+				setFetching(true);
 				let res = await startCrawl(board_name, new Date(date), keyword);
 				setArticle(res);
 				setFetching(false);
-			}} disabled={!checkDate(date)}>開始查詢</button>
+			}} disabled={!checkDate(date) || fetching}>開始查詢</button>
 		</div>
 		<div style={{
 			gridColumnStart: 2,
-			gridColumnEnd: 3
+			gridColumnEnd: 3,
+			overflowY: 'scroll'
 		}}>
-			{
-				(() => {
-					if (fetching) {
-						return <div/>;
-					} else {
-						return <div>{JSON.stringify(articles)}</div>;
-					}
-				})()
-			}
+			<ArticleList articles={articles} />
 		</div>
 	</div>;
 }
