@@ -1,10 +1,32 @@
+import { SortFlag, getArticleValue } from './sort_flag';
+
 export enum CommentType { Push, Arrow, Fuck }
+
+function stringBytes(c: string): number {
+	let n = c.length, s;
+	let len = 0;
+	for (let i = 0; i < n; i++) {
+		s = c.charCodeAt(i);
+		while (s > 0) {
+			len++;
+			s = s >> 8;
+		}
+	}
+	return len;
+}
+function padString(s: string, max_len: number): string {
+	let res = s;
+	for (let i = stringBytes(s); i < max_len; i++) {
+		res += ' ';
+	}
+	return res;
+}
 
 class Comment {
 	constructor(
 		public readonly author: string,
 		public readonly type: CommentType
-	) {}
+	) { }
 }
 
 export type IdDict = { [id: string]: number };
@@ -83,5 +105,8 @@ export class Article {
 			}
 		})();
 		this._comments.push(new Comment(author, type));
+	}
+	public stringify(flag: SortFlag): string {
+		return `${padString(this.author, 15)} ${padString(this.title, 40)} ${getArticleValue(this, flag)}`;
 	}
 }

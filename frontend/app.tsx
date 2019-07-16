@@ -99,20 +99,18 @@ function App(): JSX.Element {
 				disabled={!checkDate(date) || fetching}>
 					開始查詢
 				</button>
+				<button onClick={() => {
+					let txt = articles.map(a => a.stringify(cur_flag));
+					setLog(txt.join('\n'));
+				}}
+				disabled={!checkDate(date) || fetching}>
+					轉為文字
+				</button>
 			</div>
-			<div style={{
-				marginTop: 5,
-				paddingLeft: '5%',
-				paddingRight: '5%',
+			<textarea style={{
 				gridRow: '2/3',
 				overflowY: 'scroll'
-			}}>
-				{
-					log.split('\n').map(s => {
-						return <div>{s}</div>;
-					})
-				}
-			</div>
+			}} value={log}/>
 		</div>
 		<FlagContext.Provider value={{ cur_flag, switchFlag }}>
 			<div style={{

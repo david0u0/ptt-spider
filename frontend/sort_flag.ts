@@ -11,7 +11,7 @@ export enum SortFlag {
 	Total
 }
 
-function getArticleValue(article: Article, flag: SortFlag): number {
+export function getArticleValue(article: Article, flag: SortFlag): number {
 	switch (flag) {
 		case SortFlag.Index:
 			return article.index;
