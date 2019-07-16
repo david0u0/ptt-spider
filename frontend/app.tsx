@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { startCrawl } from './spider';
 import { Article } from './article';
 import { ArticleList } from './article_list';
+import { SortFlag, sortArticles, FlagContext } from './sort_flag';
 
 function useInput(
 	placeholder: string,
@@ -53,6 +54,12 @@ function App(): JSX.Element {
 	let [i_date, date] = useInput('日期 (YYYY/MM/DD)', input_style, checkDate, '2019/7/13');
 	let [articles, setArticle] = React.useState<Article[]>([]);
 	let [fetching, setFetching] = React.useState(false);
+	let [cur_flag, setCurFlag] = React.useState(SortFlag.Index);
+
+	function switchFlag(flag: SortFlag): void {
+		setCurFlag(flag);
+		setArticle(sortArticles(articles, flag));
+	}
 
 	return <div style={{
 		height: '100%',
@@ -73,17 +80,19 @@ function App(): JSX.Element {
 			<button onClick={async () => {
 				setFetching(true);
 				let res = await startCrawl(board_name, new Date(date), keyword);
-				setArticle(res);
+				setArticle(sortArticles(res, cur_flag));
 				setFetching(false);
 			}} disabled={!checkDate(date) || fetching}>開始查詢</button>
 		</div>
-		<div style={{
-			gridColumnStart: 2,
-			gridColumnEnd: 3,
-			overflowY: 'scroll'
-		}}>
-			<ArticleList articles={articles} />
-		</div>
+		<FlagContext.Provider value={{ cur_flag, switchFlag }}>
+			<div style={{
+				gridColumnStart: 2,
+				gridColumnEnd: 3,
+				overflowY: 'scroll'
+			}}>
+				<ArticleList articles={articles}/>
+			</div>
+		</FlagContext.Provider>
 	</div>;
 }
 

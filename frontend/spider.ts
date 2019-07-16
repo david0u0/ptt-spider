@@ -91,5 +91,8 @@ export async function startCrawl(b_name: string, date: Date, keyword: string): P
 		}
 		articles = articles.concat(t);
 	}
+	for (let [i, a] of articles.entries()) {
+		a.index = i;
+	}
 	return articles;
 }

@@ -1,25 +1,50 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useContext } from 'react';
 import { Article } from './article';
+import { SortFlag, FlagContext } from './sort_flag';
+
+function SortingCell(
+	props: {
+		txt: string,
+		flag: SortFlag,
+	}
+): JSX.Element {
+	const { cur_flag, switchFlag } = useContext(FlagContext);
+	return <div style={{
+		textAlign: 'center',
+		backgroundColor: cur_flag == props.flag ? '#b1d6fc' : 'inherit',
+	}}>
+		<span>{props.txt}</span>
+		<span style={{
+			color: cur_flag == props.flag ? 'red' : 'inherit',
+			cursor: 'pointer'
+		}} onClick={() => {
+			if (props.flag == cur_flag) {
+				switchFlag(SortFlag.Index);
+			} else {
+				switchFlag(props.flag);
+			}
+		}}>⬆</span>
+	</div>;
+}
 
 export function ArticleList(props: { articles: Article[] }): JSX.Element {
 	return <>
 		<div style={{
 			display: 'grid',
 			gridTemplateColumns: '35fr 10fr 10fr 10fr 10fr 10fr 10fr',
-			gridColumnGap: '5px'
 		}}>
-			<div>標題/作者</div>
-			<div>總推噓</div>
-			<div>總推數</div>
-			<div>總噓數</div>
-			<div>不同帳號推文數</div>
-			<div>不同帳號噓文數</div>
-			<div>總箭頭數</div>
+			<div style={{ textAlign: 'center' }}>標題/作者</div>
+			<SortingCell txt='推噓相抵' flag={SortFlag.CleanPush}/>
+			<SortingCell txt='總推數' flag={SortFlag.Push}/>
+			<SortingCell txt='總噓數' flag={SortFlag.Fuck}/>
+			<SortingCell txt='不同帳號推文數' flag={SortFlag.DiffPush}/>
+			<SortingCell txt='不同帳號噓文數' flag={SortFlag.DiffFuck}/>
+			<SortingCell txt='總留言數' flag={SortFlag.Total}/>
 		</div>
 		<hr style={{ borderColor: 'gray' }} />
 		<div style={{
 			display: 'grid',
-			gridTemplateColumns: '35fr 10fr 10fr 10fr 10fr 10fr 10fr'
+			gridTemplateColumns: '35fr 10fr 10fr 10fr 10fr 10fr 10fr',
 		}}>
 			{
 				props.articles.map((article, i) => {
@@ -30,27 +55,30 @@ export function ArticleList(props: { articles: Article[] }): JSX.Element {
 	</>;
 }
 
-function BottomedDiv(props: { children: ReactNode }): JSX.Element {
+function ValueDiv(props: { children: ReactNode, flag?: SortFlag }): JSX.Element {
+	const { cur_flag } = useContext(FlagContext);
 	return <div style={{
+		textAlign: 'center',
 		borderBottomColor: '#ddd',
 		borderBottomStyle: 'solid',
-		borderBottomWidth: 1
+		borderBottomWidth: 1,
+		backgroundColor: cur_flag == props.flag ? '#b1d6fc' : 'inherit'
 	}}>{props.children}</div>;
 }
 
 function SingleArticle(props: { article: Article }): JSX.Element {
 	let article = props.article;
 	return <>
-		<BottomedDiv>
+		<ValueDiv>
 			<div><a href={article.url}>{article.title}</a></div>
 			<div>{article.author}</div>
-		</BottomedDiv>
-		<BottomedDiv>{article.total}</BottomedDiv>
-		<BottomedDiv>{article.push}</BottomedDiv>
-		<BottomedDiv>{article.fuck}</BottomedDiv>
-		<BottomedDiv>{article.diff_push}</BottomedDiv>
-		<BottomedDiv>{article.diff_fuck}</BottomedDiv>
-		<BottomedDiv>{article.arrow}</BottomedDiv>
+		</ValueDiv>
+		<ValueDiv flag={SortFlag.CleanPush}>{article.clean_push}</ValueDiv>
+		<ValueDiv flag={SortFlag.Push}>{article.push}</ValueDiv>
+		<ValueDiv flag={SortFlag.Fuck}>{article.fuck}</ValueDiv>
+		<ValueDiv flag={SortFlag.DiffPush}>{article.diff_push}</ValueDiv>
+		<ValueDiv flag={SortFlag.DiffFuck}>{article.diff_fuck}</ValueDiv>
+		<ValueDiv flag={SortFlag.Total}>{article.total}</ValueDiv>
 	</>;
 }
 

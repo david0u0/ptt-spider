@@ -10,6 +10,8 @@ class Comment {
 type Dict = { [id: string]: number };
 
 export class Article {
+	public index: number;
+
 	private _comments: Comment[];
 	public get comments(): Comment[] { return this._comments; }
 
@@ -32,7 +34,8 @@ export class Article {
 	public get fuck_id_dict(): Dict { return { ...this._fuck_id_dict }; }
 	public get arrow_id_dict(): Dict { return { ...this._arrow_id_dict }; }
 
-	public get total(): number { return this._push - this._fuck; }
+	public get total(): number { return this._push + this._fuck + this._arrow; }
+	public get clean_push(): number { return this._push - this._fuck; }
 
 	constructor(
 		public readonly url: string,
@@ -40,6 +43,7 @@ export class Article {
 		public readonly author: string,
 		public readonly date: Date
 	) {
+		this.index = 0;
 		this._comments = [];
 		this._push = this._fuck = this._arrow = 0;
 		this._diff_push = this._diff_fuck = this._diff_arrow = 0;
