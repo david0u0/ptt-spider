@@ -5,7 +5,12 @@ import { Article } from './article';
 //const request = remote.require('request');
 const BASE = 'https://www.ptt.cc/';
 
-async function crawlArticle(url: string, date: Date): Promise<Article | null> {
+async function crawlArticle(
+	author: string,
+	title: string,
+	url: string,
+	min_date: Date
+): Promise<Article | null> {
 	let rs: AxiosResponse;
 	try {
 		rs = await Axios.get(url);
@@ -13,12 +18,9 @@ async function crawlArticle(url: string, date: Date): Promise<Article | null> {
 		return null;
 	}
 	let body = cheerio.load(rs.data, { decodeEntities: false });
-
 	let lines = body('.article-metaline');
-	let author = body(lines[0]).find('.article-meta-value').html();
-	let title = body(lines[1]).find('.article-meta-value').html();
 	let cur_date = new Date(body(lines[2]).find('.article-meta-value').html());
-	if (cur_date < date) {
+	if (cur_date < min_date) {
 		return null;
 	} else {
 		let article = new Article(url, title, author, cur_date);
@@ -52,13 +54,16 @@ async function crawlSingleList(
 		} catch (err) {
 			return [];
 		}
-		let body = cheerio.load(rs.data);
+		let body = cheerio.load(rs.data, { decodeEntities: false });
 		return await crawlSingleList(date, body);
 	} else {
 		let promises = new Array<Promise<Article>>();
-		arg('.title').each((_, title) => {
-			let href = arg(title).find('a').attr('href');
-			promises.push(crawlArticle(`${BASE}/${href}`, date));
+		arg('.r-ent').each((_, block) => {
+			let dom_a = arg(block).find('.title').find('a');
+			let href = dom_a.attr('href');
+			let title = dom_a.html();
+			let author = arg(block).find('.author').html();
+			promises.push(crawlArticle(author, title, `${BASE}/${href}`, date));
 		});
 		let articles = await Promise.all(promises);
 		console.log(articles);
@@ -75,7 +80,7 @@ async function crawlSingleList(
 export async function startCrawl(b_name: string, date: Date, keyword: string): Promise<Article[]> {
 	let url = `${BASE}/bbs/${b_name}/search?q=${keyword}`;
 	let rs = await Axios.get(url);
-	let body = cheerio.load(rs.data);
+	let body = cheerio.load(rs.data, { decodeEntities: false });
 
 	let oldest_href = body('.btn-group-paging').find('a').attr('href');
 	let page_max = parseInt(oldest_href.match(/\w*\/search\?\w*page=(\d+)\w*/)[1]);
