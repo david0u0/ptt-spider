@@ -33,7 +33,12 @@ function getArticleValue(article: Article, flag: SortFlag): number {
 export function sortArticles(articles: Article[], flag: SortFlag): Article[] {
 	articles = [...articles];
 	articles.sort((a, b) => {
-		return getArticleValue(b, flag) - getArticleValue(a, flag);
+		let res = getArticleValue(b, flag) - getArticleValue(a, flag);
+		if (res == 0) {
+			return b.index - a.index;
+		} else {
+			return res;
+		}
 	});
 	return articles;
 }

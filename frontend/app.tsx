@@ -45,9 +45,7 @@ function checkNotEmpty(s: string): boolean {
 function App(): JSX.Element {
 	let input_style = {
 		display: 'block',
-		width: '90%',
-		marginLeft: 'auto',
-		marginRight: 'auto',
+		width: '100%',
 	};
 	let [i_board_name, board_name] = useInput('看板名稱', input_style, checkNotEmpty, 'WomenTalk');
 	let [i_keyword, keyword] = useInput('關鍵字', input_style, checkNotEmpty, '[活動]');
@@ -74,15 +72,20 @@ function App(): JSX.Element {
 			gridColumnStart: 1,
 			gridColumnEnd: 2
 		}}>
-			{i_board_name}
-			{i_keyword}
-			{i_date}
-			<button onClick={async () => {
-				setFetching(true);
-				let res = await startCrawl(board_name, new Date(date), keyword);
-				setArticle(sortArticles(res, cur_flag));
-				setFetching(false);
-			}} disabled={!checkDate(date) || fetching}>開始查詢</button>
+			<div style={{ marginLeft: 'auto', marginRight: 'auto', width: '90%' }}>
+				{i_board_name}
+				{i_keyword}
+				{i_date}
+				<button onClick={async () => {
+					setFetching(true);
+					let res = await startCrawl(board_name, new Date(date), keyword);
+					setArticle(sortArticles(res, cur_flag));
+					setFetching(false);
+				}}
+				disabled={!checkDate(date) || fetching}>
+					開始查詢
+				</button>
+			</div>
 		</div>
 		<FlagContext.Provider value={{ cur_flag, switchFlag }}>
 			<div style={{
@@ -90,7 +93,7 @@ function App(): JSX.Element {
 				gridColumnEnd: 3,
 				overflowY: 'scroll'
 			}}>
-				<ArticleList articles={articles}/>
+				<ArticleList articles={articles} />
 			</div>
 		</FlagContext.Provider>
 	</div>;
