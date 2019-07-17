@@ -107,10 +107,10 @@ function App(): JSX.Element {
 					轉為文字
 				</button>
 			</div>
-			<textarea style={{
+			<pre style={{
 				gridRow: '2/3',
 				overflowY: 'scroll'
-			}} value={log}/>
+			}}>{log}</pre>
 		</div>
 		<FlagContext.Provider value={{ cur_flag, switchFlag }}>
 			<div style={{
